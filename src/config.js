@@ -14,6 +14,6 @@ angular.module('myApp').constant("config", {
         WIDTH : 15,
         HEIGHT: 15
     },
-    COUNT_DOWN_TO_START: 2
+    COUNT_DOWN_TO_START: 1
 
 });

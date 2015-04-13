@@ -6,7 +6,7 @@
  * ------------------------------------
  */
 
-angular.module('myApp').service('drawService', ['$log', '$translate', 'config' ,function($log, $translate, config) {
+angular.module('myApp').service('drawService', ['$log', '$translate', 'config', function($log, $translate, config) {
     
     'use strict';
 
@@ -26,38 +26,35 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config' ,
     var CELL_HEIGHT = config.CELL.HEIGHT;
     var WALL_WIDTH = 15;
     var WALL_HEIGHT = 15;
-    var rowsNum = CANVAS_WIDTH / CELL_WIDTH;
-    var colsNum = CANVAS_HEIGHT / CELL_HEIGHT;
-    var drawEveryMilliseconds = 120;
-
     var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
-    var SNAKE_LENGTH = 6;
 
-    function draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart) {
+    //var rowsNum = CANVAS_WIDTH / CELL_WIDTH;
+    //var colsNum = CANVAS_HEIGHT / CELL_HEIGHT;
+    //var drawEveryMilliseconds = 120;
+    //var SNAKE_LENGTH = 6;
+
+    function draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart, level) {
         var yourColor = playerSnakeColor[yourPlayerIndex];
         ctx.fillStyle = yourColor;
         ctx.font = '80px Open Sans';
         ctx.fillText("" + secondsToReallyStart, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
 
-        ctx.font = '20px Open Sans';
-        var msg = $translate.instant("YOUR_TANK_COLOR_IS",
+        ctx.font = '15px Open Sans';
+        var msg = "Map: " + level + ". "  + $translate.instant("YOUR_TANK_COLOR_IS",
             {color: $translate.instant(yourColor.toUpperCase())});
         ctx.fillText(msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT / 4 - 30);
     }
 
-    function draw_tank(ctx, snake, playerIndex) {
+    function draw_tank(ctx, tank, playerIndex) {
         ctx.globalAlpha = 1;
-        for(var i = 0; i < snake.length; i++) {
-            var c = snake[i];
-
-            //paint_snake(c.x, c.y, playerSnakeColor[playerIndex]);
-
+        for(var i = 0; i < tank.length; i++) {
+            var c = tank[i];
             var color = playerSnakeColor[playerIndex];
             var x = c.x;
             var y = c.y;
-            ctx.globalAlpha = 1 - i / snake.length;
+            ctx.globalAlpha = 1 - i / tank.length;
             ctx.fillStyle = color;
-            if (i == 0) {
+            if (i === 0) {
                 ctx.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
             } else {
                 ctx.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
@@ -143,7 +140,35 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config' ,
         ctx.shadowOffsetY = 0;
     };
 
+    function draw_canvas(ctx, allTanks, yourPlayerIndex, tank_array, walls, startMatchTime, bomb, allScores, players) {
+        //To avoid the tank trail we need to paint the BG on every frame
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        for (var i = 0; i < allTanks.length; i++) {
+            if (i !== yourPlayerIndex) {
+                draw_tank(allTanks[i], i);
+            }
+        }
+
+        // Your tank is always drawn last (so it will be completely visible).
+        draw_tank(ctx, tank_array, yourPlayerIndex);
+
+        // draw the walls
+        draw_wall(ctx, walls);
+
+        draw_timer(ctx, startMatchTime);
+
+        //Lets paint the bomb
+        draw_bomb(ctx, bomb.x, bomb.y, 'green');
+
+        draw_score(ctx, allScores, players);
+    }
+
     return {
+        draw_canvas: draw_canvas,
         draw_prompt: draw_prompt,
         draw_tank: draw_tank,
         draw_wall: draw_wall,
@@ -151,7 +176,7 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config' ,
         draw_score: draw_score,
         draw_timer: draw_timer,
         show_dialogue: show_dialogue
-    }
+    };
 
 }]);
 

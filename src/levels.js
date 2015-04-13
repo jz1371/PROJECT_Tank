@@ -1,11 +1,11 @@
 
-angular.module('myApp').service('levelsService', ['$window', '$log', function($window, $log) {
+angular.module('myApp').service('levelsService', [ function() {
 
     'use strict';
 
-    function test() {
-        $window.alert("test");
-    }
+    //function test() {
+    //    $window.alert("test");
+    //}
 
     var levels = [
         {
@@ -25,9 +25,10 @@ angular.module('myApp').service('levelsService', ['$window', '$log', function($w
                 [],
                 [],
                 [],
-                [-1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1, 1, 1, 1, 1, 1, 1, 1],
                 []
-            ]
+            ],
+            bomb_speed: 100000
         },
         {
             level: 2,
@@ -49,18 +50,41 @@ angular.module('myApp').service('levelsService', ['$window', '$log', function($w
                 [],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1],
                 []
-            ]
+            ],
+            bomb_speed: 5000
+        },
+        {
+            level: 3,
+            map: [
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [1,1],
+                [-1,-1,-1,1],
+                [-1,-1,-1, 1, 1, 1, 1,-1, 1],
+                [],
+                [-1, 1,-1,-1,-1],
+                [-1, 1,-1,-1,-1],
+                [],
+                [],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1],
+                []
+            ],
+            bomb_speed: 3000
         }
     ];
-
 
     function getLevel(level) {
         return levels[level];
     }
 
     return {
-        test: test,
+        getNumberOfLevels: levels.length,
         getLevel: getLevel
-    }
+    };
 
 }]);

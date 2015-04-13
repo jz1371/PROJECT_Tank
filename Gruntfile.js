@@ -31,15 +31,25 @@ module.exports = function(grunt) {
           console: false,
         },
       },
-      all: ['index.js', 'realTimeService.js']
+      all: ['src/*.js', 'realTimeService.js']
     },
+      concat: {
+          options: {
+              separator: ';',
+          },
+          dist: {
+              // Order is important! gameLogic.js must be first because it defines myApp angular module.
+              src: ['src/index.js', 'src/config.js', 'src/draw.js', 'src/levels.js'],
+              dest: 'dist/index.js',
+          },
+      },
     uglify: {
       options: {
         sourceMap: true,
       },
       my_target: {
         files: {
-          'dist/index.min.js': ['index.js']
+          'dist/index.min.js': ['dist/index.js']
         }
       }
     },
@@ -60,8 +70,8 @@ module.exports = function(grunt) {
             'http://yoav-zibin.github.io/emulator/dist/realTimeServices.min.js',
             'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.2.6.1.min.js',
             'languages/en.js',
-            'http://yoav-zibin.github.io/emulator/main.css',
-            'dist/index.min.js'
+            'dist/index.min.js',
+            'http://yoav-zibin.github.io/emulator/main.css'
           ],
           network: [
             'languages/en.js',
@@ -94,6 +104,6 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
   // Default task(s).
-  grunt.registerTask('default', ['jshint', 'uglify', 'processhtml', 'manifest']);
+  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'processhtml', 'manifest']);
 
 };
