@@ -1,33 +1,31 @@
-angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'randomService','levelsService', 'drawService',
-    function ($translate, $log, realTimeService, randomService, levelsService, drawService) {
+/**
+ * File: src/index.js
+ * ------------------------
+ * @By: Jingxin Zhu
+ * @On: 2014.04.10
+ * ------------------------
+ */
+angular.module('myApp', [])
+ .run(['$translate', '$log', 'realTimeService', 'randomService','levelsService', 'drawService', 'config',
+    function ($translate, $log, realTimeService, randomService, levelsService, drawService, config) {
 
         'use strict';
 
         // Constants
-        var canvasWidth = 300;
-        var canvasHeight = 300;
+        var canvasWidth = config.CANVAS.WIDTH;
+        var canvasHeight = config.CANVAS.HEIGHT;
 
         //Lets save the cell width in a variable for easy control
-        var cellWidth = 15;
-        var cellHeight = 15;
+        var cellWidth = config.CELL.WIDTH;
+        var cellHeight = config.CELL.HEIGHT;
         var WALL_WIDTH = 15;
         var WALL_HEIGHT = 15;
         var rowsNum = canvasWidth / cellWidth;
         var colsNum = canvasHeight / cellHeight;
-        var drawEveryMilliseconds = 120;
+        var drawEveryMilliseconds = 150;
 
-        var COUNT_DOWN_TO_START = 1;
+        var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
         var SNAKE_LENGTH = 6;
-
-        // There are 1-8 players.
-        // Colors:
-        // black: canvas borders
-        // white: canvas background
-        // green: food
-        var playerSnakeColor = [
-            'blue', 'red', 'brown', 'purple',
-            'pink', 'yellow', 'orange', 'silver'
-        ];
 
         function createCanvasController(canvas) {
             $log.info("createCanvasController for canvas.id=" + canvas.id);
@@ -160,7 +158,6 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
 
             //TODO: design walls
             function create_walls () {
-
                 var walls = [];
                 var map = levelsService.getLevel(0).map;
                 for (var i = 0; i < map.length; i++) {
@@ -171,8 +168,6 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                     }
                 }
                 return walls;
-
-                //return walls;
             }
 
             // create a food at the top of canvas
@@ -194,22 +189,16 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                     Math.floor((new Date().getTime() - startMatchTime) / 1000);
 
                 if (secondsFromStart < COUNT_DOWN_TO_START) {
+                    var info = "game is to start";
+                    //drawService.show_dialogue(ctx, info);
                     // Countdown to really start
                     changeDirQueue = []; // Clear any direction changes in the queue
                     draw();
                     // Draw countdown
                     var secondsToReallyStart = COUNT_DOWN_TO_START - secondsFromStart;
 
-                    // Gives you a hint what is your color
-                    var yourColor = playerSnakeColor[yourPlayerIndex];
-                    ctx.fillStyle = yourColor;
-                    ctx.font = '80px Open Sans';
-                    ctx.fillText("" + secondsToReallyStart, canvasWidth / 2, canvasHeight / 2);
+                    drawService.draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart);
 
-                    ctx.font = '20px Open Sans';
-                    var msg = $translate.instant("YOUR_TANK_COLOR_IS",
-                        {color: $translate.instant(yourColor.toUpperCase())});
-                    ctx.fillText(msg, canvasWidth / 4 - 30, canvasHeight / 4 - 30);
                     return;
                 }
 
@@ -289,6 +278,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                         drawSnake(allSnakes[i], i);
                     }
                 }
+
                 // Your snake is always drawn last (so it will be completely visible).
                 drawSnake(snake_array, yourPlayerIndex);
 
@@ -300,16 +290,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                 //Lets paint the food
                 drawBomb(food.x, food.y, 'green');
 
-                //Lets paint the score
-                for (i = 0; i < allScores.length; i++) {
-                    ctx.font = '12px Open Sans';
-                    var color = playerSnakeColor[i];
-                    ctx.fillStyle = color;
-                    var msg = $translate.instant("COLOR_SCORE_IS",
-                        {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
-                    ctx.fillText(msg,
-                        5 + i * canvasWidth / playersInfo.length, canvasHeight - 5);
-                }
+                drawService.draw_score(ctx, allScores, playersInfo.length);
 
             }
 

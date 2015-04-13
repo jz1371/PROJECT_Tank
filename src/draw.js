@@ -6,29 +6,44 @@
  * ------------------------------------
  */
 
-angular.module('myApp').service('drawService', ['$log', '$translate', function($log, $translate) {
+angular.module('myApp').service('drawService', ['$log', '$translate', 'config' ,function($log, $translate, config) {
+    
     'use strict';
 
-    /** ******** Constants ***********/
-    var canvasWidth = 300;
-    var canvasHeight = 300;
-
+    /** ******** Game Constants ***********/
+    // There are 1-8 players.
+    // Colors:  black: canvas borders
+    //          white: canvas background
+    //          green: bomb
     var playerSnakeColor = [
-        'blue', 'red', 'brown', 'purple',
+        'blue', 'red',    'brown',  'purple',
         'pink', 'yellow', 'orange', 'silver'
     ];
 
-    //Lets save the cell width in a variable for easy control
-    var cellWidth = 15;
-    var cellHeight = 15;
+    var CANVAS_WIDTH = config.CANVAS.WIDTH;
+    var CANVAS_HEIGHT = config.CANVAS.HEIGHT;
+    var CELL_WIDTH = config.CELL.WIDTH;
+    var CELL_HEIGHT = config.CELL.HEIGHT;
     var WALL_WIDTH = 15;
     var WALL_HEIGHT = 15;
-    var rowsNum = canvasWidth / cellWidth;
-    var colsNum = canvasHeight / cellHeight;
+    var rowsNum = CANVAS_WIDTH / CELL_WIDTH;
+    var colsNum = CANVAS_HEIGHT / CELL_HEIGHT;
     var drawEveryMilliseconds = 120;
 
-    var COUNT_DOWN_TO_START = 1;
+    var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
     var SNAKE_LENGTH = 6;
+
+    function draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart) {
+        var yourColor = playerSnakeColor[yourPlayerIndex];
+        ctx.fillStyle = yourColor;
+        ctx.font = '80px Open Sans';
+        ctx.fillText("" + secondsToReallyStart, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+
+        ctx.font = '20px Open Sans';
+        var msg = $translate.instant("YOUR_TANK_COLOR_IS",
+            {color: $translate.instant(yourColor.toUpperCase())});
+        ctx.fillText(msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT / 4 - 30);
+    }
 
     function draw_tank(ctx, snake, playerIndex) {
         ctx.globalAlpha = 1;
@@ -43,13 +58,13 @@ angular.module('myApp').service('drawService', ['$log', '$translate', function($
             ctx.globalAlpha = 1 - i / snake.length;
             ctx.fillStyle = color;
             if (i == 0) {
-                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                ctx.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
             } else {
-                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                ctx.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
             }
             ctx.strokeStyle = "white";
             ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-            ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
+            ctx.strokeRect(x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
         }
         ctx.globalAlpha = 1;
     }
@@ -81,23 +96,61 @@ angular.module('myApp').service('drawService', ['$log', '$translate', function($
         ctx.fillStyle = "black";
         var msg = $translate.instant("TIMER_IS",
             {timer: timer});
-        ctx.fillText("time: " + msg, canvasWidth / 4 - 30, canvasHeight - 5);
+        ctx.fillText("time: " + msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT - 5);
     }
 
     function draw_bomb(ctx, x, y, color) {
-
         ctx.fillStyle = color;
-        ctx.fillRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
+        ctx.fillRect(x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
         ctx.strokeStyle = "white";
-        ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
-
+        ctx.strokeRect(x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
     }
 
+    function draw_score (ctx, allScores, players) {
+        //Lets paint the score
+        for (var i = 0; i < allScores.length; i++) {
+            ctx.font = '12px Open Sans';
+            var color = playerSnakeColor[i];
+            ctx.fillStyle = color;
+            var msg = $translate.instant("COLOR_SCORE_IS",
+                {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
+            ctx.fillText(msg,
+                5 + i * CANVAS_WIDTH / players, CANVAS_HEIGHT - 5);
+        }
+    }
+
+    function show_dialogue (ctx, info) {
+        ctx.fillStyle = "rgba(255, 255, 255, 1)";
+        ctx.strokeStyle = "black";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+        ctx.shadowBlur = 15;
+        ctx.fillRect(CANVAS_WIDTH / 2 - 150, CANVAS_HEIGHT / 2 - 150, 300, 300);
+        ctx.strokeRect(CANVAS_WIDTH / 2 - 150, CANVAS_HEIGHT / 2 - 150, 300, 300);
+        clearShadows(ctx);
+        ctx.fillStyle = "black";
+        ctx.font = "600 32px Open Sans";
+        ctx.textAlign = "center";
+        ctx.fillText(info, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+        ctx.font = "20px Open Sans";
+        ctx.fillText("Space to continue", CANVAS_WIDTH/2, CANVAS_HEIGHT/2+35);
+    }
+
+    var clearShadows = function(ctx) {
+        ctx.shadowColor = 0;
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+    };
+
     return {
+        draw_prompt: draw_prompt,
         draw_tank: draw_tank,
         draw_wall: draw_wall,
         draw_bomb: draw_bomb,
-        draw_timer: draw_timer
+        draw_score: draw_score,
+        draw_timer: draw_timer,
+        show_dialogue: show_dialogue
     }
 
 }]);
