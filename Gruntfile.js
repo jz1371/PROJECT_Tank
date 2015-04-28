@@ -71,6 +71,7 @@ module.exports = function(grunt) {
             'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.2.6.1.min.js',
             'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.min.js',
             'dist/tank.min.js',
+            'lib/fpsmeter.min.js',
             'http://yoav-zibin.github.io/emulator/main.css'
           ],
           network: [

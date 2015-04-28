@@ -45,11 +45,16 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
 
             var level;
 
+            var fpsmeter; //fps meter
+
 
             /**
              * @param params {matchController, playersInfo, yourPlayerIndex}
              */
             function gotStartMatch(params) {
+
+                fpsmeter = new window.FPSMeter({graph: true, theme: 'light', left: '20px'});
+
                 yourPlayerIndex = params.yourPlayerIndex;
                 playersInfo = params.playersInfo;
                 matchController = params.matchController;
@@ -184,6 +189,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
             }
 
             function updateAndDraw() {
+                fpsmeter.tickStart();
                 if (!isGameOngoing) {
                     return;
                 }
@@ -201,6 +207,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
 
                     drawService.draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart, level.level);
 
+                    fpsmeter.tick();
                     return;
                 }
 
@@ -262,6 +269,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
 
                 sendMessage(isReliable);
                 draw();
+                fpsmeter.tick();
             }
 
 
