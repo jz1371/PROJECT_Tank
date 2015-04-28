@@ -3,10 +3,6 @@ angular.module('myApp').service('levelsService', [ function() {
 
     'use strict';
 
-    //function test() {
-    //    $window.alert("test");
-    //}
-
     var levels = [
         {
             level: 1,

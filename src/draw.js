@@ -28,11 +28,6 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config', 
     var WALL_HEIGHT = 15;
     var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
 
-    //var rowsNum = CANVAS_WIDTH / CELL_WIDTH;
-    //var colsNum = CANVAS_HEIGHT / CELL_HEIGHT;
-    //var drawEveryMilliseconds = 120;
-    //var SNAKE_LENGTH = 6;
-
     function draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart, level) {
         var yourColor = playerSnakeColor[yourPlayerIndex];
         ctx.fillStyle = yourColor;
@@ -40,8 +35,8 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config', 
         ctx.fillText("" + secondsToReallyStart, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
 
         ctx.font = '15px Open Sans';
-        var msg = "Map: " + level + ". "  + $translate.instant("YOUR_TANK_COLOR_IS",
-            {color: $translate.instant(yourColor.toUpperCase())});
+        var msg = $translate('MAP') + level + ": "  + $translate("YOUR_TANK_COLOR_IS",
+            {color: $translate(yourColor.toUpperCase())});
         ctx.fillText(msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT / 4 - 30);
     }
 
@@ -91,9 +86,8 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config', 
         // Let's paint the timer
         ctx.font = '12px Open Sans';
         ctx.fillStyle = "black";
-        var msg = $translate.instant("TIMER_IS",
-            {timer: timer});
-        ctx.fillText("time: " + msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT - 5);
+        var msg = $translate("TIMER") + ": " + $translate("TIMER_IS", {timer: timer});
+        ctx.fillText(msg, CANVAS_WIDTH / 4 - 30, CANVAS_HEIGHT - 5);
     }
 
     function draw_bomb(ctx, x, y, color) {
@@ -109,8 +103,8 @@ angular.module('myApp').service('drawService', ['$log', '$translate', 'config', 
             ctx.font = '12px Open Sans';
             var color = playerSnakeColor[i];
             ctx.fillStyle = color;
-            var msg = $translate.instant("COLOR_SCORE_IS",
-                {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
+            var msg = $translate("COLOR_SCORE_IS",
+                {color: $translate(color.toUpperCase()), score: "" + allScores[i]});
             ctx.fillText(msg,
                 5 + i * CANVAS_WIDTH / players, CANVAS_HEIGHT - 5);
         }

@@ -383,13 +383,5 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
         });
 
 
-    }])
+    }]);
 
-    .config(['$translateProvider', function($translateProvider) {
-
-        'use strict';
-
-        $translateProvider.init(['en', 'he']);
-
-    }]
-);
