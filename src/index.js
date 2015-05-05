@@ -5,8 +5,8 @@
  * @On: 2014.04.10
  * ------------------------
  */
-angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'randomService','levelsService', 'drawService', 'config',
-    function ($translate, $log, realTimeService, randomService, levelsService, drawService, config) {
+angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$translate', '$log', 'realTimeService', 'randomService','levelsService', 'drawService', 'config',
+    function ($rootScope, $translate, $log, realTimeService, randomService, levelsService, drawService, config) {
 
         'use strict';
 
@@ -21,6 +21,7 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
         var SNAKE_LENGTH = 6;
         var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
 
+        $rootScope.isHelpModalShown = false;
 
         function createCanvasController(canvas) {
 
@@ -45,8 +46,9 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
 
             var level;
 
-            var fpsmeter; //fps meter
+            var gamePaused = false;
 
+            var fpsmeter; //fps meter
 
             /**
              * @param params {matchController, playersInfo, yourPlayerIndex}
@@ -90,7 +92,6 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
             function gotMessage(params) {
                 var fromPlayerIndex = params.fromPlayerIndex;
                 var messageString = params.message;
-                // {f: bombCreatedNum, s: score, a: tank_array}
                 // The array representing the cells of a player's tank.
                 var messageObject = angular.fromJson(messageString);
                 allTanks[fromPlayerIndex] = messageObject.a;
@@ -189,8 +190,10 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
             }
 
             function updateAndDraw() {
-                fpsmeter.tickStart();
-                if (!isGameOngoing) {
+                if (!gamePaused && fpsmeter !== undefined) {
+                    fpsmeter.tickStart();
+                }
+                if (gamePaused || !isGameOngoing) {
                     return;
                 }
                 var secondsFromStart =
@@ -272,6 +275,27 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                 fpsmeter.tick();
             }
 
+            function pauseGame() {
+                if (!gamePaused) {
+                    clearInterval(drawInterval);
+                    gamePaused = true;
+                } else if (gamePaused) {
+                    setDrawInterval();
+                    gamePaused = false;
+                }
+            }
+
+            document.getElementById('help').addEventListener('click', function() {
+                pauseGame();
+            }, false);
+
+            document.getElementById('close').addEventListener('click', function() {
+                pauseGame();
+            }, false);
+
+            document.getElementById('closeTimes').addEventListener('click', function() {
+                pauseGame();
+            }, false);
 
             function draw() {
                 drawService.draw_canvas(ctx, allTanks, yourPlayerIndex, tank_array, walls, startMatchTime, bomb, allScores, playersInfo.length);
@@ -331,8 +355,11 @@ angular.module('myApp', []).run(['$translate', '$log', 'realTimeService', 'rando
                 var dir = key === 37 ? "left"
                     : key === 38 ? "up"
                     : key === 39 ? "right"
+                    : key === 80 ? "paused"
                     : key === 40 ? "down" : null;
-                if (dir !== null) {
+                if (dir === "paused") {
+                    pauseGame();
+                } else if (dir !== null) {
                     addChangeDir(dir);
                 }
             }, false);

@@ -66,10 +66,17 @@ module.exports = function(grunt) {
           basePath: '.',
           cache: [
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular-touch.min.js',
+            'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
+            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css',
+            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.woff',
+            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.ttf',
             'http://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js',
             'http://yoav-zibin.github.io/emulator/dist/realTimeServices.2.min.js',
             'dist/tank.min.js',
             'lib/fpsmeter.min.js',
+            'imgs/help1.png',
+            'imgs/help2.png',
             'http://yoav-zibin.github.io/emulator/main.css'
           ],
           network: [
@@ -80,7 +87,7 @@ module.exports = function(grunt) {
           ],
           timestamp: true
         },
-        dest: 'game.appcache',
+        dest: 'index.appcache',
         src: []
       }
     },
