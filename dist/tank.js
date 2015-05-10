@@ -277,10 +277,10 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
 
             function pauseGame() {
                 if (!gamePaused) {
-                    clearInterval(drawInterval);
+                    //clearInterval(drawInterval);
                     gamePaused = true;
                 } else if (gamePaused) {
-                    setDrawInterval();
+                    //setDrawInterval();
                     gamePaused = false;
                 }
             }

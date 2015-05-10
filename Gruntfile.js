@@ -73,6 +73,7 @@ module.exports = function(grunt) {
             'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.ttf',
             'http://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js',
             'http://yoav-zibin.github.io/emulator/dist/realTimeServices.2.min.js',
+            'index.css',
             'dist/tank.min.js',
             'lib/fpsmeter.min.js',
             'imgs/help1.png',
