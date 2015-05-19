@@ -22,6 +22,28 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
         var COUNT_DOWN_TO_START = config.COUNT_DOWN_TO_START;
 
         $rootScope.isHelpModalShown = false;
+        $rootScope.isSinglePlayer = false;
+        var isSinglePlayerGlobal = false;
+
+        var gamePaused = false;
+
+        var startMatchTime; // For displaying a countdown.
+        var timePaused;
+
+        $rootScope.carouselClick = function() {
+            if(isSinglePlayerGlobal) {
+                $rootScope.isHelpModalShown = true;
+                gamePaused = true;
+                // calculating new starting game time
+                timePaused = new Date().getTime() - startMatchTime;
+            }
+        };
+
+        $rootScope.carouselClose = function() {
+            $rootScope.isHelpModalShown = false;
+            gamePaused = false;
+            startMatchTime = new Date().getTime() - timePaused;
+        };
 
         function createCanvasController(canvas) {
 
@@ -39,29 +61,26 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
             var bombCreatedNum; // Number of bomb pieces that were created (a bomb piece should be eaten by one player only).
             var d;              // Direction: "right", "left", "up", "down"
             var bomb;           // {x: ..., y: ...}
-            var startMatchTime; // For displaying a countdown.
 
             var walls;
             var timer;
 
             var level;
 
-            var gamePaused = false;
 
-            var fpsmeter; //fps meter
 
             /**
              * @param params {matchController, playersInfo, yourPlayerIndex}
              */
             function gotStartMatch(params) {
 
-                fpsmeter = new window.FPSMeter({graph: true, theme: 'light', left: '20px'});
-
                 yourPlayerIndex = params.yourPlayerIndex;
                 playersInfo = params.playersInfo;
                 matchController = params.matchController;
                 isGameOngoing = true;
                 isSinglePlayer = playersInfo.length === 1;
+                isSinglePlayerGlobal = isSinglePlayer;
+                $rootScope.isSinglePlayer = isSinglePlayerGlobal;
 
                 bombCreatedNum = 0;
                 allTanks = [];
@@ -141,9 +160,12 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
                 drawInterval = setInterval(updateAndDraw, intervalMillis);
             }
 
+
             function stopDrawInterval() {
                 clearInterval(drawInterval);
             }
+
+            $rootScope.stopDrawInterval = stopDrawInterval;
 
             function create_tank(playerIndex) {
                 var length = SNAKE_LENGTH;  // Initial length of the tank
@@ -190,10 +212,8 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
             }
 
             function updateAndDraw() {
-                if (!gamePaused && fpsmeter !== undefined) {
-                    fpsmeter.tickStart();
-                }
                 if (gamePaused || !isGameOngoing) {
+                    // if game is paused or game is over, no need to update and draw
                     return;
                 }
                 var secondsFromStart =
@@ -210,7 +230,6 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
 
                     drawService.draw_prompt(ctx, yourPlayerIndex, secondsToReallyStart, level.level);
 
-                    fpsmeter.tick();
                     return;
                 }
 
@@ -272,30 +291,7 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
 
                 sendMessage(isReliable);
                 draw();
-                fpsmeter.tick();
             }
-
-            function pauseGame() {
-                if (!gamePaused) {
-                    //clearInterval(drawInterval);
-                    gamePaused = true;
-                } else if (gamePaused) {
-                    //setDrawInterval();
-                    gamePaused = false;
-                }
-            }
-
-            document.getElementById('help').addEventListener('click', function() {
-                pauseGame();
-            }, false);
-
-            document.getElementById('close').addEventListener('click', function() {
-                pauseGame();
-            }, false);
-
-            document.getElementById('closeTimes').addEventListener('click', function() {
-                pauseGame();
-            }, false);
 
             function draw() {
                 drawService.draw_canvas(ctx, allTanks, yourPlayerIndex, tank_array, walls, startMatchTime, bomb, allScores, playersInfo.length);
@@ -335,7 +331,6 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
             }
 
             function changeBombPosition(bomb, timer) {
-                //console.log('speed: ' + level.bomb_speed);
                 if (timer / level.bomb_speed > bombCreatedNum) {
                     create_bomb();
                 }
@@ -355,11 +350,8 @@ angular.module('myApp', ['ngTouch','ui.bootstrap']).run(['$rootScope', '$transla
                 var dir = key === 37 ? "left"
                     : key === 38 ? "up"
                     : key === 39 ? "right"
-                    : key === 80 ? "paused"
                     : key === 40 ? "down" : null;
-                if (dir === "paused") {
-                    pauseGame();
-                } else if (dir !== null) {
+                if (dir !== null) {
                     addChangeDir(dir);
                 }
             }, false);
